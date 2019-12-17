@@ -2,10 +2,11 @@ require_relative "../config/environment.rb"
 
 class Student
   
-  attr_accessor :name, :grade
-  attr_reader :id
+  attr_accessor :name, :grade, :id
+  # attr_reader :id
   
   def initialize(name, grade, id=nil)
+    @id = id
     @name = name 
     @grade = grade
   end
@@ -30,11 +31,6 @@ class Student
     DB[:conn].execute(sql)
   end
   
-  def update
-    sql = "UPDATE students SET name = ?, grade = ? WHERE id = ?"
-    DB[:conn].execute(sql, self.name, self.grade, self.id)
-  end
-  
   def save
   if self.id
     self.update
@@ -48,14 +44,20 @@ class Student
   end
 end
 
-  def self.create(name:, grade:)
+  def self.create(name, grade)
     students = Student.new(name, grade)
-    students.new(name, grade)
     students.save
-    students
   end
   
-     
+   def self.new_from_db(row)
+    id = row[0]
+    name = row[1]
+    grade = row[2]
+    self.new(id, name, grade)
+  end
   
-
-end
+  def update
+    sql = "UPDATE students SET name = ?, grade = ? WHERE id = ?"
+    DB[:conn].execute(sql, self.name, self.grade, self.id)
+  end
+end  
